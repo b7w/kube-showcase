@@ -1,0 +1,59 @@
+---
+kind: pipeline
+type: docker
+name: Kube CI
+
+concurrency:
+  limit: 1
+
+steps:
+  - name: Build backend
+    pull: always
+    image: eclipse-temurin:17-jdk-focal
+    commands:
+      - echo "revision=$DRONE_COMMIT_SHA build=$DRONE_BUILD_NUMBER" > src/main/resources/static/version.txt
+      - mvn --quiet clean package
+      - rm src/main/resources/static/version.txt
+
+  - name: Build docker
+    pull: always
+    image: plugins/docker
+    settings:
+      registry: registry.b7w.me
+      repo: registry.b7w.me/hashproof.io/kube
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+      dockerfile: .ci/Dockerfile
+      tags:
+        - '${DRONE_BRANCH/\//-}-${DRONE_BUILD_NUMBER}'
+      bip: 173.17.1.1/24  # For docker in docker
+    when:
+      branch:
+        - main
+      event:
+        exclude:
+          - pull_request
+
+  - name: Notify on failure
+    image: drillster/drone-email
+    pull: always
+    settings:
+      host: smtp.yandex.ru
+      port: 465
+      username: noreply@hashproof.io
+      password:
+        from_secret: email_user_password
+      from: noreply@hashproof.io
+    when:
+      status:
+        - failure
+      event:
+        exclude:
+          - pull_request
+
+trigger:
+  event:
+    exclude:
+      - promote
