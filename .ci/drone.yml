@@ -12,7 +12,7 @@ steps:
     image: eclipse-temurin:17-jdk-focal
     commands:
       - echo "revision=$DRONE_COMMIT_SHA build=$DRONE_BUILD_NUMBER" > src/main/resources/static/version.txt
-      - mvn --quiet clean package
+      - ./mvnw --quiet clean package
       - rm src/main/resources/static/version.txt
 
   - name: Build docker
