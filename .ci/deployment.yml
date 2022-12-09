@@ -34,6 +34,7 @@ spec:
       labels:
         app: kube
         stand: st1
+        now: '{{ range(1000) | random }}'
     spec:
       volumes:
         - name: config
@@ -116,7 +117,7 @@ spec:
     - host: kube.local
       http:
         paths:
-          - path: /
+          - path: /(.*)
             pathType: Prefix
             backend:
               service:
