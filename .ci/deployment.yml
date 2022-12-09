@@ -3,10 +3,10 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: kube-app-yml
-  namespace: default
+  namespace: {{ namespace }}
 data:
   application.yml: |
-    management.server.port: 9090    
+    management.server.port: 9090
   tmp.txt: 'Hello!\n'
 
 
@@ -15,12 +15,12 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kube-st1
-  namespace: default
+  namespace: {{ namespace }}
   labels:
     app: kube
     stand: st1
 spec:
-  replicas: 3
+  replicas: {{ scale }}
   selector:
     matchLabels:
       app: kube
@@ -74,7 +74,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: kube-service
-  namespace: default
+  namespace: {{ namespace }}
 spec:
   type: NodePort
   selector:
@@ -91,7 +91,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: kube-service-management
-  namespace: default
+  namespace: {{ namespace }}
 spec:
   type: NodePort
   selector:
@@ -108,7 +108,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: kube-ingress
-  namespace: default
+  namespace: {{ namespace }}
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$1
 spec:
@@ -130,7 +130,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: kube-ingress-management
-  namespace: default
+  namespace: {{ namespace }}
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /actuator/$1
 spec:
